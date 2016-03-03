@@ -1,0 +1,9 @@
+# directories
+__pycache__/
+
+# binary files
+*pyc
+
+# swap files
+*swp
+*~
