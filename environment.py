@@ -2,7 +2,7 @@ def make_environment():
     '''Create a square boolean grid where true corresponds to haul-out'''
     import numpy
 
-    # boolean mask of environment
+    # boolean mask of 2D habitat
     environment = numpy.zeros((10,10))
 
     environment[3:7, 3:7] = True
