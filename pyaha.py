@@ -6,11 +6,12 @@ def run_aha(t0, dt, nt, spp_cfg, n_organisms):
     import environment
     import movement
     import organism
+    import prey
 
     # Gen environment grid
     grid = environment.make_environment()
-    ymax = grid.shape[0]
-    xmax = grid.shape[1]
+    ydim = grid.shape[0]
+    xdim = grid.shape[1]
 
     # Init organisms
     organisms = list()
@@ -18,8 +19,8 @@ def run_aha(t0, dt, nt, spp_cfg, n_organisms):
         mean_weight = 15.0
         biomass = numpy.random.normal(mean_weight, 1.0)
         mature = False
-        x = random.randint(0, xmax)
-        y = random.randint(0, ymax)
+        x = random.randint(0, xdim-1)
+        y = random.randint(0, ydim-1)
         z = 0
         mature = False
 
@@ -32,19 +33,32 @@ def run_aha(t0, dt, nt, spp_cfg, n_organisms):
 
     # Time-step model
     sim_time = t0
+    prey_grid = prey.random(xdim, ydim, 200)
+
     for t in range(nt):
         sim_time = t0 + datetime.timedelta(days=t)
 
         # Loop through organisms
         for o in organisms:
-            if o.alive:
-                # Get and set new position to organism
-                o.x, o.y = movement.random_walk(o.x, o.y, xmax, ymax)
+            # Get and set new position to organism
+            o.x, o.y = movement.random_walk(o.x, o.y, xdim, ydim)
+            #TODO appraise: aroused, hungry, fear
+              # feed (stomach)
+            if prey_grid[o.y, o.x]!=0:
+                prey_grid[o.y, o.x] -= 1
+                o.stomach += 1
+              # run
+              # mate
+              # rest
 
-                # Save position to simulation output data
-                sim_data = archive(sim_data, o, sim_time.strftime('%Y-%m-%s %H%M%S'))
+            #TODO update age
+            #TODO update biomass
+              # metabolism/death (energy store + intake - energy consumed)
 
-    return sim_data, organisms
+            # Save position to simulation output data
+            sim_data = archive(sim_data, o, sim_time.strftime('%Y-%m-%s %H%M%S'))
+
+    return sim_data
 
 
 def archive(sim_data, organism_obj, t):
@@ -72,13 +86,15 @@ if __name__ == '__main__':
     dt = datetime.timedelta(seconds=5)
     nt = 100
 
-    sim_data, organisms = run_aha(t0, dt, nt, SEAL_CFG, 10)
+    sim_data = run_aha(t0, dt, nt, SEAL_CFG, 10)
 
+    # Extract data from simulationd data
     t = numpy.asarray(sim_data['t'])
     myid = numpy.asarray(sim_data['id'])
     x = numpy.asarray(sim_data['x'])
     y = numpy.asarray(sim_data['y'])
 
+    # Plat track for organism 1
     idx = (myid==1)
     xs = x[idx]
     ys = y[idx]
