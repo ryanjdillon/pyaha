@@ -7,3 +7,6 @@ __pycache__/
 # swap files
 *swp
 *~
+
+# virtualenv dir
+venv/
